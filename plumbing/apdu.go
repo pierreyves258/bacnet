@@ -1,6 +1,9 @@
 package plumbing
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 )
@@ -28,7 +31,10 @@ func NewAPDU(t, s uint8, objs []objects.APDUPayload) *APDU {
 // UnmarshalBinary sets the values retrieved from byte sequence in a APDU frame.
 func (a *APDU) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < a.MarshalLen() {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal APDU bin length %d, marshal length %d", l, a.MarshalLen()),
+		)
 	}
 
 	a.Type = b[0] >> 4
@@ -134,7 +140,10 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 // MarshalTo puts the byte sequence in the byte array given as b.
 func (a *APDU) MarshalTo(b []byte) error {
 	if len(b) < a.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+		)
 	}
 
 	var offset int = 0
@@ -149,14 +158,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += int(o.MarshalLen())
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}
@@ -169,14 +181,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}
@@ -191,14 +206,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}

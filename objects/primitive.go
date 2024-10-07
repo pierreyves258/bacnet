@@ -2,19 +2,27 @@ package objects
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 )
 
 func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return 0, common.ErrWrongPayload
+		return 0, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecUnisgnedInteger not ok: %v", rawPayload),
+		)
 	}
 
 	if rawObject.TagNumber != TagUnsignedInteger || rawObject.TagClass {
-		return 0, common.ErrWrongStructure
+		return 0, errors.Wrap(
+			common.ErrWrongStructure,
+			fmt.Sprintf("DecUnisgnedInteger wrong tag number: %v", rawObject.TagNumber),
+		)
 	}
 
 	switch rawObject.Length {
@@ -28,7 +36,23 @@ func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 		return binary.BigEndian.Uint32(rawObject.Data), nil
 	}
 
-	return 0, common.ErrNotImplemented
+	return 0, errors.Wrap(
+		common.ErrNotImplemented,
+		fmt.Sprintf("DecUnisgnedInteger not implemented data: %v", rawObject.Data),
+	)
+}
+func EncUnsignedInteger8(value uint8) *Object {
+	newObj := Object{}
+
+	data := make([]byte, 1)
+	data[0] = value
+
+	newObj.TagNumber = TagUnsignedInteger
+	newObj.TagClass = false
+	newObj.Data = data
+	newObj.Length = uint8(len(data))
+
+	return &newObj
 }
 
 func EncUnsignedInteger16(value uint16) *Object {
@@ -41,18 +65,24 @@ func EncUnsignedInteger16(value uint16) *Object {
 	newObj.TagClass = false
 	newObj.Data = data
 	newObj.Length = uint8(len(data))
-
+	
 	return &newObj
 }
 
 func DecEnumerated(rawPayload APDUPayload) (uint32, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return 0, common.ErrWrongPayload
+		return 0, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecEnumerated not ok %v", rawPayload),
+		)
 	}
 
 	if rawObject.TagNumber != TagEnumerated || rawObject.TagClass {
-		return 0, common.ErrWrongStructure
+		return 0, errors.Wrap(
+			common.ErrWrongStructure,
+			fmt.Sprintf("DecEnumerated wrong tag number: %v", rawObject.TagNumber),
+		)
 	}
 
 	switch rawObject.Length {
@@ -66,7 +96,10 @@ func DecEnumerated(rawPayload APDUPayload) (uint32, error) {
 		return binary.BigEndian.Uint32(rawObject.Data), nil
 	}
 
-	return 0, common.ErrNotImplemented
+	return 0, errors.Wrap(
+		common.ErrNotImplemented,
+		fmt.Sprintf("DecEnumerated not implemented data: %v", rawObject.Data),
+	)
 }
 
 func EncEnumerated(value uint8) *Object {
@@ -86,11 +119,17 @@ func EncEnumerated(value uint8) *Object {
 func DecReal(rawPayload APDUPayload) (float32, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return 0, common.ErrWrongPayload
+		return 0, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecReal not ok: %v", rawPayload),
+		)
 	}
 
 	if rawObject.TagNumber != TagReal {
-		return 0, common.ErrWrongStructure
+		return 0, errors.Wrap(
+			common.ErrWrongStructure,
+			fmt.Sprintf("DecReal bad tag number: %v", rawObject.TagNumber),
+		)
 	}
 
 	return math.Float32frombits(binary.BigEndian.Uint32(rawObject.Data)), nil
@@ -113,11 +152,17 @@ func EncReal(value float32) *Object {
 func DecNull(rawPayload APDUPayload) (bool, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return false, common.ErrWrongPayload
+		return false, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecNull not ok %v", rawPayload),
+		)
 	}
 
 	if rawObject.TagNumber != TagReal {
-		return false, common.ErrWrongStructure
+		return false, errors.Wrap(
+			common.ErrWrongStructure,
+			fmt.Sprintf("DecNull bad tag number %v", rawObject.TagNumber),
+		)
 	}
 
 	return rawObject.TagNumber == TagNull && !rawObject.TagClass && rawObject.Length == 0, nil

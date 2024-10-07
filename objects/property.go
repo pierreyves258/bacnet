@@ -1,23 +1,35 @@
 package objects
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 )
 
 func DecPropertyIdentifier(rawPayload APDUPayload) (uint8, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return 0, common.ErrWrongPayload
+		return 0, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecPropertyIdentifier not ok %v", rawPayload),
+		)
 	}
 
 	switch rawObject.TagClass {
 	case true:
 		if rawObject.Length != 1 {
-			return 0, common.ErrWrongStructure
+			return 0, errors.Wrap(
+				common.ErrWrongStructure,
+				fmt.Sprintf("DecPropertyIdentifier length %d tag class  %v", rawObject.Length, rawObject.TagClass),
+			)
 		}
 	case false:
 		if rawObject.Length != 1 || !rawObject.TagClass {
-			return 0, common.ErrWrongStructure
+			return 0, errors.Wrap(
+				common.ErrWrongStructure,
+				fmt.Sprintf("DecPropertyIdentifier length %d tag class  %v", rawObject.Length, rawObject.TagClass),
+			)
 		}
 	}
 

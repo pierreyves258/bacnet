@@ -1,6 +1,9 @@
 package objects
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 )
 
@@ -33,14 +36,20 @@ const objLenMin int = 2
 // UnmarshalBinary sets the values retrieved from byte sequence in a Object frame.
 func (o *Object) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < objLenMin {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal Object bin length %d, marshal length %d", l, objLenMin),
+		)
 	}
 	o.TagNumber = b[0] >> 4
 	o.TagClass = common.IntToBool(int(b[0]) & 0x8 >> 3)
 	o.Length = b[0] & 0x7
 
 	if l := len(b); l < int(o.Length) {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal Object bin length %d, marshal length %d", l, o.Length),
+		)
 	}
 
 	o.Data = b[1:o.Length]
@@ -52,7 +61,7 @@ func (o *Object) UnmarshalBinary(b []byte) error {
 func (o *Object) MarshalBinary() ([]byte, error) {
 	b := make([]byte, o.MarshalLen())
 	if err := o.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Marshal Object")
 	}
 
 	return b, nil
@@ -61,7 +70,10 @@ func (o *Object) MarshalBinary() ([]byte, error) {
 // MarshalTo puts the byte sequence in the byte array given as b.
 func (o *Object) MarshalTo(b []byte) error {
 	if len(b) < o.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("Marshal Object bin length %d, marshal length %d", len(b), o.MarshalLen()),
+		)
 	}
 	b[0] = o.TagNumber<<4 | uint8(common.BoolToInt(o.TagClass))<<3 | o.Length
 	if o.Length > 0 {

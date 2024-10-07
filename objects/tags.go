@@ -1,6 +1,9 @@
 package objects
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 )
 
@@ -20,14 +23,20 @@ func NewNamedTag(number uint8, class bool, name uint8) *NamedTag {
 
 func (n *NamedTag) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < objLenMin {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal NamedTag bin length %d, min length %d", l, objLenMin),
+		)
 	}
 	n.TagNumber = b[0] >> 4
 	n.TagClass = common.IntToBool(int(b[0]) & 0x8 >> 3)
 	n.Name = b[0] & 0x7
 
 	if l := len(b); l < 1 {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal NamedTag bin length %d", l),
+		)
 	}
 
 	return nil
@@ -36,7 +45,7 @@ func (n *NamedTag) UnmarshalBinary(b []byte) error {
 func (n *NamedTag) MarshalBinary() ([]byte, error) {
 	b := make([]byte, n.MarshalLen())
 	if err := n.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "unable to marshal NamedTag")
 	}
 
 	return b, nil
@@ -44,7 +53,10 @@ func (n *NamedTag) MarshalBinary() ([]byte, error) {
 
 func (n *NamedTag) MarshalTo(b []byte) error {
 	if len(b) < n.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("marshall NamedTag length %d is less than %d", len(b), n.MarshalLen()),
+		)
 	}
 	b[0] = n.TagNumber<<4 | uint8(common.BoolToInt(n.TagClass))<<3 | n.Name
 
@@ -58,7 +70,10 @@ func (n *NamedTag) MarshalLen() int {
 func DecOpeningTab(rawPayload APDUPayload) (bool, error) {
 	rawTag, ok := rawPayload.(*NamedTag)
 	if !ok {
-		return false, common.ErrWrongPayload
+		return false, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecOpeningTab not ok %T", rawPayload),
+		)
 	}
 	return rawTag.Name == 0x6 && rawTag.TagClass, nil
 }
@@ -76,7 +91,10 @@ func EncOpeningTag(tagN uint8) *NamedTag {
 func DecClosingTab(rawPayload APDUPayload) (bool, error) {
 	rawTag, ok := rawPayload.(*NamedTag)
 	if !ok {
-		return false, common.ErrWrongPayload
+		return false, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecClosingTab not ok %T", rawPayload),
+		)
 	}
 	return rawTag.Name == 0x7 && rawTag.TagClass, nil
 }

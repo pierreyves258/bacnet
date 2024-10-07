@@ -72,7 +72,7 @@ func (bvlc *BVLC) MarshalTo(b []byte) error {
 	if len(b) < bvlc.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprint("Marshal BVLC bin length %d, marshal length %d", len(b), bvlc.MarshalLen()),
+			fmt.Sprintf("Marshal BVLC bin length %d, marshal length %d", len(b), bvlc.MarshalLen()),
 		)
 	}
 	b[0] = byte(bvlc.Type)

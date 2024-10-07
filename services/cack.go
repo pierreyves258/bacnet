@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -47,21 +49,25 @@ func NewComplexACK(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *ComplexACK {
 
 func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
+		fmt.Println("complexack")
 		return common.ErrTooShortToParse
 	}
 
 	var offset int = 0
 	if err := c.BVLC.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("complexack")
 		return common.ErrTooShortToParse
 	}
 	offset += c.BVLC.MarshalLen()
 
 	if err := c.NPDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("complexack")
 		return common.ErrTooShortToParse
 	}
 	offset += c.NPDU.MarshalLen()
 
 	if err := c.APDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("complexack")
 		return common.ErrTooShortToParse
 	}
 

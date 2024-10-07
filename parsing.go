@@ -1,6 +1,8 @@
 package bacnet
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/plumbing"
 	"github.com/ulbios/bacnet/services"
@@ -14,7 +16,9 @@ func combine(t, s uint8) uint16 {
 
 // Parse decodes the given bytes.
 func Parse(b []byte) (plumbing.BACnet, error) {
+
 	if len(b) < bacnetLenMin {
+		fmt.Println("len", len(b))
 		return nil, common.ErrTooShortToParse
 	}
 
@@ -23,15 +27,17 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	var bacnet plumbing.BACnet
 
 	offset := 0
-
+	fmt.Println("parsing")
 	if err := bvlc.UnmarshalBinary(b); err != nil {
 		return nil, err
 	}
+	fmt.Println("bvlc done")
 	offset += bvlc.MarshalLen()
 
 	if err := npdu.UnmarshalBinary(b[offset:]); err != nil {
 		return nil, err
 	}
+	fmt.Println("npdu done")
 	offset += npdu.MarshalLen()
 
 	var c uint16
@@ -43,7 +49,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	case plumbing.ComplexAck, plumbing.SimpleAck, plumbing.Error:
 		c = combine(b[offset], 0) // We need to skip the PDU flags and the InvokeID
 	}
-
+	fmt.Println(c)
 	switch c {
 	case combine(plumbing.UnConfirmedReq<<4, services.ServiceUnconfirmedWhoIs):
 		bacnet = services.NewUnconfirmedWhoIs(&bvlc, &npdu)
@@ -62,10 +68,11 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	default:
 		return nil, common.ErrNotImplemented
 	}
-
+	fmt.Println("confirmed", bacnet)
 	if err := bacnet.UnmarshalBinary(b); err != nil {
 		return nil, err
 	}
 
+	fmt.Println("processed")
 	return bacnet, nil
 }

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -48,21 +50,25 @@ func NewUnconfirmedIAm(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *UnconfirmedIAm
 // UnmarshalBinary sets the values retrieved from byte sequence in a UnconfirmedIAm frame.
 func (u *UnconfirmedIAm) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < u.MarshalLen() {
+		fmt.Println("iam", u.MarshalLen(), l)
 		return common.ErrTooShortToParse
 	}
 
 	var offset int = 0
 	if err := u.BVLC.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("iam - bvlc")
 		return common.ErrTooShortToParse
 	}
 	offset += u.BVLC.MarshalLen()
 
 	if err := u.NPDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("iam - npdu")
 		return common.ErrTooShortToParse
 	}
 	offset += u.NPDU.MarshalLen()
 
 	if err := u.APDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("iam - apdu")
 		return common.ErrTooShortToParse
 	}
 
@@ -104,8 +110,12 @@ func (u *UnconfirmedIAm) MarshalTo(b []byte) error {
 // MarshalLen returns the serial length of UnconfirmedIAm.
 func (u *UnconfirmedIAm) MarshalLen() int {
 	l := u.BVLC.MarshalLen()
+	m := l
 	l += u.NPDU.MarshalLen()
+	n := l-m
 	l += u.APDU.MarshalLen()
+	o := l-m-n
+	fmt.Println("mlen", l, m, n, o)
 
 	return l
 }

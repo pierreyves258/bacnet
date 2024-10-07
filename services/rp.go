@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -43,6 +45,7 @@ func NewConfirmedReadProperty(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Confirm
 
 func (c *ConfirmedReadProperty) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
+		fmt.Println("rp")
 		return common.ErrTooShortToParse
 	}
 

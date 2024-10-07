@@ -1,6 +1,8 @@
 package plumbing
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 )
@@ -28,6 +30,7 @@ func NewAPDU(t, s uint8, objs []objects.APDUPayload) *APDU {
 // UnmarshalBinary sets the values retrieved from byte sequence in a APDU frame.
 func (a *APDU) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < a.MarshalLen() {
+		fmt.Println("apdu")
 		return common.ErrTooShortToParse
 	}
 
@@ -210,6 +213,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 // MarshalLen returns the serial length of APDU.
 func (a *APDU) MarshalLen() int {
 	var l int = 0
+	fmt.Println(a.Type)
 	switch a.Type {
 	case ConfirmedReq:
 		l += 4
@@ -218,7 +222,7 @@ func (a *APDU) MarshalLen() int {
 	case UnConfirmedReq:
 		l += 2
 	}
-
+	fmt.Println(a.Objects)
 	for _, o := range a.Objects {
 		l += o.MarshalLen()
 	}

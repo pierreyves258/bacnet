@@ -1,6 +1,8 @@
 package objects
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 )
 
@@ -20,6 +22,7 @@ func NewNamedTag(number uint8, class bool, name uint8) *NamedTag {
 
 func (n *NamedTag) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < objLenMin {
+		fmt.Println("namedtag")
 		return common.ErrTooShortToParse
 	}
 	n.TagNumber = b[0] >> 4
@@ -27,6 +30,7 @@ func (n *NamedTag) UnmarshalBinary(b []byte) error {
 	n.Name = b[0] & 0x7
 
 	if l := len(b); l < 1 {
+		fmt.Println("namedtag")
 		return common.ErrTooShortToParse
 	}
 

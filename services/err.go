@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/objects"
 	"github.com/ulbios/bacnet/plumbing"
@@ -44,21 +46,26 @@ func NewError(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Error {
 // UnmarshalBinary sets the values retrieved from byte sequence in a UnconfirmedIAm frame.
 func (e *Error) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < e.MarshalLen() {
+		fmt.Println("error")
 		return common.ErrTooShortToParse
 	}
 
 	var offset int = 0
+
 	if err := e.BVLC.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("error")
 		return common.ErrTooShortToParse
 	}
 	offset += e.BVLC.MarshalLen()
 
 	if err := e.NPDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("error")
 		return common.ErrTooShortToParse
 	}
 	offset += e.NPDU.MarshalLen()
 
 	if err := e.APDU.UnmarshalBinary(b[offset:]); err != nil {
+		fmt.Println("error")
 		return common.ErrTooShortToParse
 	}
 

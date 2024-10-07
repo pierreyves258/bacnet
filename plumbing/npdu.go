@@ -2,6 +2,7 @@ package plumbing
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"github.com/ulbios/bacnet/common"
 )
@@ -35,6 +36,7 @@ func (n *NPDU) SetControlFlags(nsduContain bool, dstSpecifier bool, srcSpecifier
 // UnmarshalBinary sets the values retrieved from byte sequence in a NPDU frame.
 func (n *NPDU) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < n.MarshalLen() {
+		fmt.Println("npdu")
 		return common.ErrTooShortToParse
 	}
 	n.Version = b[0]

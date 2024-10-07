@@ -2,6 +2,7 @@ package plumbing
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"github.com/ulbios/bacnet/common"
 )
@@ -34,6 +35,7 @@ func NewBVLC(f uint8) *BVLC {
 // UnmarshalBinary sets the values retrieved from byte sequence in a BVLC frame.
 func (bvlc *BVLC) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < bvlc.MarshalLen() {
+		fmt.Println("bvlc")
 		return common.ErrTooShortToParse
 	}
 	bvlc.Type = b[0]

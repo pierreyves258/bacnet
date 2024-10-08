@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/jonalfarlinga/bacnet/objects"
 	"github.com/jonalfarlinga/bacnet/plumbing"

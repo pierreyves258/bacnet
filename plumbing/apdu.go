@@ -3,8 +3,9 @@ package plumbing
 import (
 	"fmt"
 
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/objects"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/objects"
+	"github.com/pkg/errors"
 )
 
 // APDU is a Application protocol DAta Units.
@@ -29,16 +30,19 @@ func NewAPDU(t, s uint8, objs []objects.APDUPayload) *APDU {
 
 // UnmarshalBinary sets the values retrieved from byte sequence in a APDU frame.
 func (a *APDU) UnmarshalBinary(b []byte) error {
+	fmt.Println("UnmarshalBinary APDU")
 	if l := len(b); l < a.MarshalLen() {
-		fmt.Println("apdu")
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Unmarshal APDU bin length %d, marshal length %d", l, a.MarshalLen()),
+		)
 	}
 
 	a.Type = b[0] >> 4
 	a.Flags = b[0] & 0x7
 
 	var offset int = 1
-
+	fmt.Println("Type: ", a.Type)
 	switch a.Type {
 	case UnConfirmedReq:
 		a.Service = b[offset]
@@ -97,10 +101,13 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 			a.Objects = objs
 		}
 	case ComplexAck, SimpleAck, Error:
+		fmt.Printf("case ACK/Err offset: %d\n", offset)
 		a.InvokeID = b[offset]
 		offset++
+		fmt.Printf("InvokeID %x offset %d\n", a.InvokeID, offset)
 		a.Service = b[offset]
 		offset++
+		fmt.Printf("Service %x offset %d\n", a.Service, offset)
 		if len(b) > 3 {
 			objs := []objects.APDUPayload{}
 			for {
@@ -110,8 +117,15 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
+				// Handle extended value case
+				if o.Length == 5 {
+					offset++
+					o.Length = uint8(b[offset])
+				}
+
 				// Drop tags so that they don't get in the way!
 				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
+					fmt.Print("tag opening/closing\n")
 					offset++
 					if offset >= len(b) {
 						break
@@ -120,6 +134,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				}
 
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
+				fmt.Printf("APDU object %v\n data %x\n offset %d\n", o, o.Data, offset)
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
 
@@ -127,6 +142,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					break
 				}
 			}
+			fmt.Println("Objects: ", len(objs))
 			a.Objects = objs
 		}
 	}
@@ -137,7 +153,10 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 // MarshalTo puts the byte sequence in the byte array given as b.
 func (a *APDU) MarshalTo(b []byte) error {
 	if len(b) < a.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+		)
 	}
 
 	var offset int = 0
@@ -152,14 +171,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += int(o.MarshalLen())
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}
@@ -172,14 +194,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}
@@ -194,14 +219,17 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "Marshal APDU")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
 				offset += o.MarshalLen()
 
 				if offset > a.MarshalLen() {
-					return common.ErrTooShortToMarshalBinary
+					return errors.Wrap(
+						common.ErrTooShortToMarshalBinary,
+						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+					)
 				}
 			}
 		}

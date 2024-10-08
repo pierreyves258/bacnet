@@ -9,9 +9,9 @@ import (
 	"net"
 	"time"
 
+	"github.com/jonalfarlinga/bacnet"
+	"github.com/jonalfarlinga/bacnet/services"
 	"github.com/spf13/cobra"
-	"github.com/ulbios/bacnet"
-	"github.com/ulbios/bacnet/services"
 )
 
 func init() {
@@ -50,6 +50,8 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 	}
 	defer listenConn.Close()
 
+	listenConn.SetDeadline(time.Now().Add(5 * time.Second))
+
 	mReadProperty, err := bacnet.NewReadProperty(rpObjectType, rpInstanceId, rpPropertyId)
 	if err != nil {
 		log.Fatalf("error generating initial ReadProperty: %v\n", err)
@@ -65,6 +67,9 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 		log.Printf("sent: %x", mReadProperty)
 
 		nBytes, remoteAddr, err := listenConn.ReadFrom(replyRaw)
+		if err != nil {
+			log.Fatalf("error reading incoming packet: %v\n", err)
+		}
 
 		log.Printf("read %d bytes from %s: %x\n", nBytes, remoteAddr, replyRaw[:nBytes])
 
@@ -87,7 +92,7 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 		}
 
 		log.Printf(
-			"decoded CACK reply:\n\tObject Type: %d\n\tInstance Id: %d\n\tProperty Id: %d\n\tValue: %f\n",
+			"decoded CACK reply:\n\tObject Type: %d\n\tInstance Id: %d\n\tProperty Id: %d\n\tValue: %v\n",
 			decodedCACK.ObjectType, decodedCACK.InstanceId, decodedCACK.PropertyId, decodedCACK.PresentValue,
 		)
 

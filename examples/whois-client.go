@@ -9,9 +9,9 @@ import (
 	"net"
 	"time"
 
+	"github.com/jonalfarlinga/bacnet"
+	"github.com/jonalfarlinga/bacnet/services"
 	"github.com/spf13/cobra"
-	"github.com/ulbios/bacnet"
-	"github.com/ulbios/bacnet/services"
 )
 
 func init() {
@@ -71,7 +71,7 @@ func whoIsExample(cmd *cobra.Command, args []string) {
 			if err != nil {
 				log.Fatalf("error reading incoming packet: %v\n", err)
 			}
-			// if common.IsLocalAddr(ifaceAddrs, remoteAddr) {
+			// if !common.IsLocalAddr(ifaceAddrs, remoteAddr) {
 			// 	break
 			// }
 			// log.Printf("got our own broadcast, back to listening...\n")

@@ -2,10 +2,12 @@ package bacnet
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/plumbing"
-	"github.com/ulbios/bacnet/services"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/jonalfarlinga/bacnet/services"
+	"github.com/pkg/errors"
 )
 
 const bacnetLenMin = 8
@@ -18,8 +20,10 @@ func combine(t, s uint8) uint16 {
 func Parse(b []byte) (plumbing.BACnet, error) {
 
 	if len(b) < bacnetLenMin {
-		fmt.Println("len", len(b))
-		return nil, common.ErrTooShortToParse
+		return nil, errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("Parsing length %d", len(b)),
+		)
 	}
 
 	var bvlc plumbing.BVLC
@@ -29,17 +33,18 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	offset := 0
 	fmt.Println("parsing")
 	if err := bvlc.UnmarshalBinary(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, fmt.Sprintf("Parsing BVLC %x", b))
 	}
 	fmt.Println("bvlc done")
 	offset += bvlc.MarshalLen()
-
+	log.Printf("BVLC %x\n", b[:offset])
 	if err := npdu.UnmarshalBinary(b[offset:]); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, fmt.Sprintf("Parsing NPDU %x", b[offset:]))
 	}
 	fmt.Println("npdu done")
 	offset += npdu.MarshalLen()
-
+	log.Printf("NPDU %x\n", b[:offset])
+	log.Printf("APDU %x\n", b[offset:])
 	var c uint16
 	switch b[offset] >> 4 & 0xFF {
 	case plumbing.UnConfirmedReq:
@@ -49,7 +54,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	case plumbing.ComplexAck, plumbing.SimpleAck, plumbing.Error:
 		c = combine(b[offset], 0) // We need to skip the PDU flags and the InvokeID
 	}
-	fmt.Println(c)
+	fmt.Printf("switch: %x\n", c)
 	switch c {
 	case combine(plumbing.UnConfirmedReq<<4, services.ServiceUnconfirmedWhoIs):
 		bacnet = services.NewUnconfirmedWhoIs(&bvlc, &npdu)
@@ -66,11 +71,16 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	case combine(plumbing.Error<<4, 0):
 		bacnet = services.NewError(&bvlc, &npdu)
 	default:
-		return nil, common.ErrNotImplemented
+		return nil, errors.Wrap(
+			common.ErrNotImplemented,
+			fmt.Sprintf("Parsing service: %x", c),
+		)
 	}
-	fmt.Println("confirmed", bacnet)
 	if err := bacnet.UnmarshalBinary(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(
+			err,
+			fmt.Sprintf("Parsing BACnet %x", b[offset:]),
+		)
 	}
 
 	fmt.Println("processed")

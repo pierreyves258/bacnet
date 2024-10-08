@@ -4,7 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/ulbios/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/pkg/errors"
 )
 
 // BVLCType is used for BACnet/IP in BVLL.
@@ -35,8 +36,12 @@ func NewBVLC(f uint8) *BVLC {
 // UnmarshalBinary sets the values retrieved from byte sequence in a BVLC frame.
 func (bvlc *BVLC) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < bvlc.MarshalLen() {
-		fmt.Println("bvlc")
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf(
+				"Unmarshal BVLC bin length %d, marshal length %d",
+				l, bvlc.MarshalLen()),
+		)
 	}
 	bvlc.Type = b[0]
 	bvlc.Function = b[1]
@@ -49,7 +54,7 @@ func (bvlc *BVLC) UnmarshalBinary(b []byte) error {
 func (bvlc *BVLC) MarshalBinary() ([]byte, error) {
 	b := make([]byte, bvlc.MarshalLen())
 	if err := bvlc.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "unable to marshal BVLC")
 	}
 
 	return b, nil
@@ -65,7 +70,10 @@ func (bvlc *BVLC) MarshalLen() int {
 // MarshalTo puts the byte sequence in the byte array given as b.
 func (bvlc *BVLC) MarshalTo(b []byte) error {
 	if len(b) < bvlc.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("Marshal BVLC bin length %d, marshal length %d", len(b), bvlc.MarshalLen()),
+		)
 	}
 	b[0] = byte(bvlc.Type)
 	b[1] = byte(bvlc.Function)

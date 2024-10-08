@@ -2,8 +2,10 @@ package objects
 
 import (
 	"encoding/binary"
+	"fmt"
 
-	"github.com/ulbios/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/pkg/errors"
 )
 
 type ObjectIdentifier struct {
@@ -16,17 +18,26 @@ func DecObjectIdentifier(rawPayload APDUPayload) (ObjectIdentifier, error) {
 
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return decObjectId, common.ErrWrongPayload
+		return decObjectId, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("DecObjectIdentifier not ok: %T", rawPayload),
+		)
 	}
 
 	switch rawObject.TagClass {
 	case true:
 		if rawObject.Length != 4 {
-			return decObjectId, common.ErrWrongStructure
+			return decObjectId, errors.Wrap(
+				common.ErrWrongStructure,
+				fmt.Sprintf("DecObjectIdentifier length: %d, tag class: %v", rawObject.Length, rawObject.TagClass),
+			)
 		}
 	case false:
 		if rawObject.Length != 4 || rawObject.TagNumber != TagBACnetObjectIdentifier {
-			return decObjectId, common.ErrWrongStructure
+			return decObjectId, errors.Wrap(
+				common.ErrWrongStructure,
+				fmt.Sprintf("DecObjectIdentifier length: %d, tag class: %v", rawObject.Length, rawObject.TagClass),
+			)
 		}
 	}
 

@@ -1,8 +1,8 @@
 package bacnet
 
 import (
-	"github.com/ulbios/bacnet/plumbing"
-	"github.com/ulbios/bacnet/services"
+	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/jonalfarlinga/bacnet/services"
 )
 
 const (

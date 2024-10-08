@@ -1,4 +1,4 @@
-module github.com/ulbios/bacnet
+module github.com/jonalfarlinga/bacnet
 
 go 1.19
 

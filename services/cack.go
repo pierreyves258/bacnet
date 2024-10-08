@@ -3,10 +3,10 @@ package services
 import (
 	"fmt"
 
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/objects"
+	"github.com/jonalfarlinga/bacnet/plumbing"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/objects"
-	"github.com/ulbios/bacnet/plumbing"
 )
 
 // UnconfirmedIAm is a BACnet message.
@@ -30,22 +30,22 @@ func ComplexACKObjects(objectType uint16, instN uint32, propertyId uint8, value 
 	objs[1] = objects.EncPropertyIdentifier(true, 1, propertyId)
 	objs[2] = objects.EncOpeningTag(3)
 
-    switch v := value.(type) {
-    case int:
-        objs[3] = objects.EncReal(float32(v))
-    case uint8:
-        objs[3] = objects.EncUnsignedInteger8(v)
-    case uint16:
-        objs[3] = objects.EncUnsignedInteger16(v)
-    case float32:
-        objs[3] = objects.EncReal(v)
-    case string:
-        objs[3] = objects.EncString(v)
-    default:
-        panic(
-            fmt.Sprintf("Unsupported PresentValue type %T", value),
-        )
-    }
+	switch v := value.(type) {
+	case int:
+		objs[3] = objects.EncReal(float32(v))
+	case uint8:
+		objs[3] = objects.EncUnsignedInteger8(v)
+	case uint16:
+		objs[3] = objects.EncUnsignedInteger16(v)
+	case float32:
+		objs[3] = objects.EncReal(v)
+	case string:
+		objs[3] = objects.EncString(v)
+	default:
+		panic(
+			fmt.Sprintf("Unsupported PresentValue type %T", value),
+		)
+	}
 
 	objs[4] = objects.EncClosingTag(3)
 	for _, o := range objs {
@@ -174,49 +174,49 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 
 	for i, obj := range c.APDU.Objects {
 		enc_obj, ok := obj.(*objects.Object)
-        if !ok {
-            return decCACK, errors.Wrap(
-                common.ErrInvalidObjectType,
-                fmt.Sprintf("ComplexACK object at index %d is not Object type", i),
-            )
-        }
+		if !ok {
+			return decCACK, errors.Wrap(
+				common.ErrInvalidObjectType,
+				fmt.Sprintf("ComplexACK object at index %d is not Object type", i),
+			)
+		}
 		fmt.Printf(
-            "Object i %d tagnum %d tagclass %v data %x\n",
-            i, enc_obj.TagNumber, enc_obj.TagClass, enc_obj.Data,
-        )
-        if enc_obj.TagClass {
-            switch enc_obj.TagNumber {
-                case 0:
-                    objId, err := objects.DecObjectIdentifier(obj)
-                    if err != nil {
-                        return decCACK, errors.Wrap(err, "decode Context object case 0")
-                    }
-                    decCACK.ObjectType = objId.ObjectType
-                    decCACK.InstanceId = objId.InstanceNumber
-                case 1:
-                    propId, err := objects.DecPropertyIdentifier(obj)
-                    if err != nil {
-                        return decCACK, errors.Wrap(err, "decode Context object case 1")
-                    }
-                    decCACK.PropertyId = propId
-            }
-        } else {
-            switch enc_obj.TagNumber {
-                case 4:
-                    value, err := objects.DecReal(obj)
-                    if err != nil {
-                        return decCACK, errors.Wrap(err, "decode Application object case 4")
-                    }
-                    decCACK.PresentValue = value
-                case 7:
-                    value, err := objects.DecString(obj)
-                    if err != nil {
-                        return decCACK, errors.Wrap(err, "decode Application object case 7")
-                    }
-                    fmt.Printf("String value %s\n", value)
-                    decCACK.PresentValue = value
-            }
-        }
+			"Object i %d tagnum %d tagclass %v data %x\n",
+			i, enc_obj.TagNumber, enc_obj.TagClass, enc_obj.Data,
+		)
+		if enc_obj.TagClass {
+			switch enc_obj.TagNumber {
+			case 0:
+				objId, err := objects.DecObjectIdentifier(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Context object case 0")
+				}
+				decCACK.ObjectType = objId.ObjectType
+				decCACK.InstanceId = objId.InstanceNumber
+			case 1:
+				propId, err := objects.DecPropertyIdentifier(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Context object case 1")
+				}
+				decCACK.PropertyId = propId
+			}
+		} else {
+			switch enc_obj.TagNumber {
+			case 4:
+				value, err := objects.DecReal(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Application object case 4")
+				}
+				decCACK.PresentValue = value
+			case 7:
+				value, err := objects.DecString(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Application object case 7")
+				}
+				fmt.Printf("String value %s\n", value)
+				decCACK.PresentValue = value
+			}
+		}
 	}
 
 	return decCACK, nil

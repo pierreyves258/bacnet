@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/plumbing"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/plumbing"
 )
 
 // UnconfirmedWhoIs is a BACnet message.

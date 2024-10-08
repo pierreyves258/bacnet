@@ -3,8 +3,8 @@ package objects
 import (
 	"fmt"
 
+	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
 )
 
 func DecPriority(rawPayload APDUPayload) (uint8, error) {

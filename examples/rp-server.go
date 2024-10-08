@@ -4,10 +4,10 @@ import (
 	"log"
 	"net"
 
+	"github.com/jonalfarlinga/bacnet"
+	"github.com/jonalfarlinga/bacnet/objects"
+	"github.com/jonalfarlinga/bacnet/services"
 	"github.com/spf13/cobra"
-	"github.com/ulbios/bacnet"
-	"github.com/ulbios/bacnet/objects"
-	"github.com/ulbios/bacnet/services"
 )
 
 var (

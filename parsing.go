@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/jonalfarlinga/bacnet/services"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/plumbing"
-	"github.com/ulbios/bacnet/services"
 )
 
 const bacnetLenMin = 8

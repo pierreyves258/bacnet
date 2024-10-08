@@ -3,9 +3,9 @@ package plumbing
 import (
 	"fmt"
 
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/objects"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/objects"
 )
 
 // APDU is a Application protocol DAta Units.
@@ -42,7 +42,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 	a.Flags = b[0] & 0x7
 
 	var offset int = 1
-    fmt.Println("Type: ", a.Type)
+	fmt.Println("Type: ", a.Type)
 	switch a.Type {
 	case UnConfirmedReq:
 		a.Service = b[offset]
@@ -117,16 +117,16 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
-                // Handle extended value case
-                if o.Length == 5 {
-                    offset++
-                    o.Length = uint8(b[offset])
-                }
+				// Handle extended value case
+				if o.Length == 5 {
+					offset++
+					o.Length = uint8(b[offset])
+				}
 
 				// Drop tags so that they don't get in the way!
 				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
 					fmt.Print("tag opening/closing\n")
-                    offset++
+					offset++
 					if offset >= len(b) {
 						break
 					}
@@ -142,7 +142,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					break
 				}
 			}
-            fmt.Println("Objects: ", len(objs))
+			fmt.Println("Objects: ", len(objs))
 			a.Objects = objs
 		}
 	}

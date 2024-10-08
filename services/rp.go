@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/ulbios/bacnet/common"
-	"github.com/ulbios/bacnet/objects"
-	"github.com/ulbios/bacnet/plumbing"
+	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/jonalfarlinga/bacnet/objects"
+	"github.com/jonalfarlinga/bacnet/plumbing"
 )
 
 // UnconfirmedIAm is a BACnet message.

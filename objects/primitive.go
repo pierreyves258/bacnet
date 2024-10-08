@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
 )
 
 func DecString(rawPayload APDUPayload) (string, error) {

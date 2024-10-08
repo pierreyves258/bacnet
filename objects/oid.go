@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/pkg/errors"
-	"github.com/ulbios/bacnet/common"
 )
 
 type ObjectIdentifier struct {

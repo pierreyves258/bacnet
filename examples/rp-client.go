@@ -50,8 +50,6 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 	}
 	defer listenConn.Close()
 
-	listenConn.SetDeadline(time.Now().Add(5 * time.Second))
-
 	mReadProperty, err := bacnet.NewReadProperty(rpObjectType, rpInstanceId, rpPropertyId)
 	if err != nil {
 		log.Fatalf("error generating initial ReadProperty: %v\n", err)
@@ -60,6 +58,7 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 	replyRaw := make([]byte, 1024)
 	sentRequests := 0
 	for {
+		listenConn.SetDeadline(time.Now().Add(5 * time.Second))
 		if _, err := listenConn.WriteTo(mReadProperty, remoteUDPAddr); err != nil {
 			log.Fatalf("Failed to write the request: %s\n", err)
 		}
@@ -92,7 +91,7 @@ func ReadPropertyClientExample(cmd *cobra.Command, args []string) {
 		}
 
 		log.Printf(
-			"decoded CACK reply:\n\tObject Type: %d\n\tInstance Id: %d\n\tProperty Id: %d\n\tValue: %v\n",
+			"decoded CACK reply:\n\tObject Type: %d\n\tInstance Id: %d\n\tProperty Id: %d\n\tValue: %v\f",
 			decodedCACK.ObjectType, decodedCACK.InstanceId, decodedCACK.PropertyId, decodedCACK.PresentValue,
 		)
 

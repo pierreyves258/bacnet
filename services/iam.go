@@ -30,11 +30,7 @@ func IAmObjects(insNum uint32, acceptedSize uint16, supportedSeg uint8, vendorID
 	objs[0] = objects.EncObjectIdentifier(false, objects.TagBACnetObjectIdentifier, objects.ObjectTypeDevice, 321)
 	objs[1] = objects.EncUnsignedInteger16(acceptedSize)
 	objs[2] = objects.EncEnumerated(supportedSeg)
-	if vendorID < 256 {
-		objs[3] = objects.EncUnsignedInteger8(uint8(vendorID))
-	} else {
-		objs[3] = objects.EncUnsignedInteger16(vendorID)
-	}
+	objs[3] = objects.EncUnsignedInteger16(vendorID)
 
 	return objs
 }

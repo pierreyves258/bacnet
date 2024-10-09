@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/ulbios/bacnet"
+	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/services"
 )
 
@@ -39,7 +40,7 @@ func whoIsExample(cmd *cobra.Command, args []string) {
 		log.Fatalf("Failed to resolve UDP address: %s", err)
 	}
 
-	_, err = net.InterfaceAddrs()
+	ifaceAddrs, err := net.InterfaceAddrs()
 	if err != nil {
 		log.Fatalf("couldn't get interface information: %v\n", err)
 	}
@@ -71,10 +72,10 @@ func whoIsExample(cmd *cobra.Command, args []string) {
 			if err != nil {
 				log.Fatalf("error reading incoming packet: %v\n", err)
 			}
-			// if !common.IsLocalAddr(ifaceAddrs, remoteAddr) {
-			// 	break
-			// }
-			// log.Printf("got our own broadcast, back to listening...\n")
+			if !common.IsLocalAddr(ifaceAddrs, remoteAddr) {
+				break
+			}
+			log.Printf("got our own broadcast, back to listening...\n")
 			break
 		}
 

@@ -30,7 +30,6 @@ func NewAPDU(t, s uint8, objs []objects.APDUPayload) *APDU {
 
 // UnmarshalBinary sets the values retrieved from byte sequence in a APDU frame.
 func (a *APDU) UnmarshalBinary(b []byte) error {
-	fmt.Println("UnmarshalBinary APDU")
 	if l := len(b); l < a.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
@@ -42,7 +41,6 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 	a.Flags = b[0] & 0x7
 
 	var offset int = 1
-    fmt.Println("Type: ", a.Type)
 	switch a.Type {
 	case UnConfirmedReq:
 		a.Service = b[offset]
@@ -101,13 +99,10 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 			a.Objects = objs
 		}
 	case ComplexAck, SimpleAck, Error:
-		fmt.Printf("case ACK/Err offset: %d\n", offset)
 		a.InvokeID = b[offset]
 		offset++
-		fmt.Printf("InvokeID %x offset %d\n", a.InvokeID, offset)
 		a.Service = b[offset]
 		offset++
-		fmt.Printf("Service %x offset %d\n", a.Service, offset)
 		if len(b) > 3 {
 			objs := []objects.APDUPayload{}
 			for {
@@ -117,15 +112,8 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
-                // Handle extended value case
-                if o.Length == 5 {
-                    offset++
-                    o.Length = uint8(b[offset])
-                }
-
 				// Drop tags so that they don't get in the way!
 				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
-					fmt.Print("tag opening/closing\n")
                     offset++
 					if offset >= len(b) {
 						break
@@ -134,7 +122,6 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				}
 
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
-				fmt.Printf("APDU object %v\n data %x\n offset %d\n", o, o.Data, offset)
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
 
@@ -142,7 +129,6 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					break
 				}
 			}
-            fmt.Println("Objects: ", len(objs))
 			a.Objects = objs
 		}
 	}

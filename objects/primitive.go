@@ -9,36 +9,6 @@ import (
 	"github.com/ulbios/bacnet/common"
 )
 
-func DecString(rawPayload APDUPayload) (string, error) {
-	rawObject, ok := rawPayload.(*Object)
-	if !ok {
-		return "", errors.Wrap(
-			common.ErrWrongPayload,
-			fmt.Sprintf("DecString not ok: %v", rawPayload),
-		)
-	}
-
-	if rawObject.TagNumber != TagCharacterString || rawObject.TagClass {
-		return "", errors.Wrap(
-			common.ErrWrongStructure,
-			fmt.Sprintf("DecString wrong tag number: %v", rawObject.TagNumber),
-		)
-	}
-
-	return string(rawObject.Data), nil
-}
-
-func EncString(value string) *Object {
-	newObj := Object{}
-
-	newObj.TagNumber = TagCharacterString
-	newObj.TagClass = false
-	newObj.Data = []byte(value)
-	newObj.Length = uint8(len(newObj.Data))
-
-	return &newObj
-}
-
 func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
@@ -70,19 +40,6 @@ func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 		common.ErrNotImplemented,
 		fmt.Sprintf("DecUnisgnedInteger not implemented data: %v", rawObject.Data),
 	)
-}
-func EncUnsignedInteger8(value uint8) *Object {
-	newObj := Object{}
-
-	data := make([]byte, 1)
-	data[0] = value
-
-	newObj.TagNumber = TagUnsignedInteger
-	newObj.TagClass = false
-	newObj.Data = data
-	newObj.Length = uint8(len(data))
-
-	return &newObj
 }
 
 func EncUnsignedInteger16(value uint16) *Object {

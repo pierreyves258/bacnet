@@ -1,6 +1,9 @@
 package services
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/plumbing"
 )
@@ -26,22 +29,34 @@ func NewUnconfirmedWhoIs(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *UnconfirmedW
 // UnmarshalBinary sets the values retrieved from byte sequence in a UnconfirmedWhoIs frame.
 func (u *UnconfirmedWhoIs) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < u.MarshalLen() {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("failed to unmarshal UnconfirmedWhoIs %v - marshal length too short", u),
+		)
 	}
 
 	var offset int = 0
 	if err := u.BVLC.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling UnconfirmedWhoIs %v", u),
+		)
 	}
 	offset += u.BVLC.MarshalLen()
 
 	if err := u.NPDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling UnconfirmedWhoIs %v", u),
+		)
 	}
 	offset += u.NPDU.MarshalLen()
 
 	if err := u.APDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling UnconfirmedWhoIs %v", u),
+		)
 	}
 
 	return nil
@@ -51,7 +66,7 @@ func (u *UnconfirmedWhoIs) UnmarshalBinary(b []byte) error {
 func (u *UnconfirmedWhoIs) MarshalBinary() ([]byte, error) {
 	b := make([]byte, u.MarshalLen())
 	if err := u.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
 	}
 	return b, nil
 }
@@ -59,21 +74,24 @@ func (u *UnconfirmedWhoIs) MarshalBinary() ([]byte, error) {
 // MarshalTo puts the byte sequence in the byte array given as b.
 func (u *UnconfirmedWhoIs) MarshalTo(b []byte) error {
 	if len(b) < u.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("failed to marshal UnconfirmedWhoIs %x - marshal length too short", b),
+		)
 	}
 	var offset = 0
 	if err := u.BVLC.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling UnconfirmedWhoIs")
 	}
 	offset += u.BVLC.MarshalLen()
 
 	if err := u.NPDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling UnconfirmedWhoIs")
 	}
 	offset += u.NPDU.MarshalLen()
 
 	if err := u.APDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling UnconfirmedWhoIs")
 	}
 
 	return nil

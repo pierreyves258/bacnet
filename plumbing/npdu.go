@@ -39,7 +39,7 @@ func (n *NPDU) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < n.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("Unmarshal NPDU bin length %d, marshal length %d", l, n.MarshalLen()),
+			fmt.Sprintf("failed to unmarshal NPDU %v - marshal length too short", n),
 		)
 	}
 	n.Version = b[0]
@@ -58,7 +58,7 @@ func (n *NPDU) MarshalTo(b []byte) error {
 	if len(b) < n.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("Marshal NPDU bin length %d, marshal length %d", len(b), n.MarshalLen()),
+			fmt.Sprintf("failed to marshall NPDU %v - marshal length too short", n),
 		)
 	}
 	b[0] = n.Version

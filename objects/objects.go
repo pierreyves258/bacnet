@@ -38,9 +38,10 @@ func (o *Object) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < objLenMin {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("Unmarshal Object bin length %d, marshal length %d", l, objLenMin),
+			fmt.Sprintf("failed to unmarshal - binary %x - too short", b),
 		)
 	}
+
 	o.TagNumber = b[0] >> 4
 	o.TagClass = common.IntToBool(int(b[0]) & 0x8 >> 3)
 	o.Length = b[0] & 0x7
@@ -48,7 +49,7 @@ func (o *Object) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < int(o.Length) {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("Unmarshal Object bin length %d, marshal length %d", l, o.Length),
+			fmt.Sprintf("failed to unmarshal object - binary %x - marshal length too short", b),
 		)
 	}
 
@@ -61,7 +62,7 @@ func (o *Object) UnmarshalBinary(b []byte) error {
 func (o *Object) MarshalBinary() ([]byte, error) {
 	b := make([]byte, o.MarshalLen())
 	if err := o.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "Marshal Object")
+		return nil, errors.Wrap(err, "failed to marshal object")
 	}
 
 	return b, nil
@@ -72,7 +73,7 @@ func (o *Object) MarshalTo(b []byte) error {
 	if len(b) < o.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("Marshal Object bin length %d, marshal length %d", len(b), o.MarshalLen()),
+			fmt.Sprintf("failed to marshal object - binary %x - marshal length too short", b),
 		)
 	}
 	b[0] = o.TagNumber<<4 | uint8(common.BoolToInt(o.TagClass))<<3 | o.Length

@@ -1,6 +1,9 @@
 package services
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
 	"github.com/ulbios/bacnet/plumbing"
 )
@@ -26,22 +29,34 @@ func NewSimpleACK(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *SimpleACK {
 
 func (s *SimpleACK) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < s.MarshalLen() {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("failed to unmarshal SACK %v - marshal length too short", s),
+		)
 	}
 
 	var offset int = 0
 	if err := s.BVLC.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling SACK %v", s),
+		)
 	}
 	offset += s.BVLC.MarshalLen()
 
 	if err := s.NPDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling SACK %v", s),
+		)
 	}
 	offset += s.NPDU.MarshalLen()
 
 	if err := s.APDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling SACK %v", s),
+		)
 	}
 
 	return nil
@@ -50,28 +65,31 @@ func (s *SimpleACK) UnmarshalBinary(b []byte) error {
 func (s *SimpleACK) MarshalBinary() ([]byte, error) {
 	b := make([]byte, s.MarshalLen())
 	if err := s.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
 	}
 	return b, nil
 }
 
 func (s *SimpleACK) MarshalTo(b []byte) error {
 	if len(b) < s.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("failed to marshal SACK %x - marshal length too short", b),
+		)
 	}
 	var offset = 0
 	if err := s.BVLC.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling SACK")
 	}
 	offset += s.BVLC.MarshalLen()
 
 	if err := s.NPDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling SACK")
 	}
 	offset += s.NPDU.MarshalLen()
 
 	if err := s.APDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "marshalling SACK")
 	}
 
 	return nil

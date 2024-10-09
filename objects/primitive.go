@@ -14,14 +14,14 @@ func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 	if !ok {
 		return 0, errors.Wrap(
 			common.ErrWrongPayload,
-			fmt.Sprintf("DecUnisgnedInteger not ok: %v", rawPayload),
+			fmt.Sprintf("failed to decode UnsignedInteger - %v", rawPayload),
 		)
 	}
 
 	if rawObject.TagNumber != TagUnsignedInteger || rawObject.TagClass {
 		return 0, errors.Wrap(
 			common.ErrWrongStructure,
-			fmt.Sprintf("DecUnisgnedInteger wrong tag number: %v", rawObject.TagNumber),
+			fmt.Sprintf("failed to decode UnsignedInteger - wrong tag number - %v", rawObject.TagNumber),
 		)
 	}
 
@@ -38,7 +38,7 @@ func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 
 	return 0, errors.Wrap(
 		common.ErrNotImplemented,
-		fmt.Sprintf("DecUnisgnedInteger not implemented data: %v", rawObject.Data),
+		fmt.Sprintf("failed to decode UnsignedInteger - %v", rawObject.Data),
 	)
 }
 
@@ -61,14 +61,14 @@ func DecEnumerated(rawPayload APDUPayload) (uint32, error) {
 	if !ok {
 		return 0, errors.Wrap(
 			common.ErrWrongPayload,
-			fmt.Sprintf("DecEnumerated not ok %v", rawPayload),
+			fmt.Sprintf("failed to decode EnumObject - %v", rawPayload),
 		)
 	}
 
 	if rawObject.TagNumber != TagEnumerated || rawObject.TagClass {
 		return 0, errors.Wrap(
 			common.ErrWrongStructure,
-			fmt.Sprintf("DecEnumerated wrong tag number: %v", rawObject.TagNumber),
+			fmt.Sprintf("failed to decode EnumObject - wrong tag number - %v", rawObject.TagNumber),
 		)
 	}
 
@@ -85,7 +85,7 @@ func DecEnumerated(rawPayload APDUPayload) (uint32, error) {
 
 	return 0, errors.Wrap(
 		common.ErrNotImplemented,
-		fmt.Sprintf("DecEnumerated not implemented data: %v", rawObject.Data),
+		fmt.Sprintf("failed to decode EnumObject - %v", rawObject.Data),
 	)
 }
 
@@ -108,14 +108,14 @@ func DecReal(rawPayload APDUPayload) (float32, error) {
 	if !ok {
 		return 0, errors.Wrap(
 			common.ErrWrongPayload,
-			fmt.Sprintf("DecReal not ok: %v", rawPayload),
+			fmt.Sprintf("failed to decode Real - %v", rawPayload),
 		)
 	}
 
 	if rawObject.TagNumber != TagReal {
 		return 0, errors.Wrap(
 			common.ErrWrongStructure,
-			fmt.Sprintf("DecReal bad tag number: %v", rawObject.TagNumber),
+			fmt.Sprintf("failed to decode real - wrong tag number - %v", rawObject.TagNumber),
 		)
 	}
 
@@ -141,14 +141,14 @@ func DecNull(rawPayload APDUPayload) (bool, error) {
 	if !ok {
 		return false, errors.Wrap(
 			common.ErrWrongPayload,
-			fmt.Sprintf("DecNull not ok %v", rawPayload),
+			fmt.Sprintf("failed to decode Null - %v", rawPayload),
 		)
 	}
 
 	if rawObject.TagNumber != TagReal {
 		return false, errors.Wrap(
 			common.ErrWrongStructure,
-			fmt.Sprintf("DecNull bad tag number %v", rawObject.TagNumber),
+			fmt.Sprintf("failed to decode Null - wrong tag number - %v", rawObject.TagNumber),
 		)
 	}
 

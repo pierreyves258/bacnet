@@ -2,7 +2,6 @@ package bacnet
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/pkg/errors"
 	"github.com/ulbios/bacnet/common"
@@ -72,7 +71,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 			fmt.Sprintf("Parsing service: %x", c),
 		)
 	}
-	
+
 	if err := bacnet.UnmarshalBinary(b); err != nil {
 		return nil, errors.Wrap(
 			err,

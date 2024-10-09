@@ -38,9 +38,7 @@ func (bvlc *BVLC) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < bvlc.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf(
-				"Unmarshal BVLC bin length %d, marshal length %d",
-				l, bvlc.MarshalLen()),
+			fmt.Sprintf("failed to unmarshal BVLC %v - binary too short", bvlc.Function),
 		)
 	}
 	bvlc.Type = b[0]
@@ -54,7 +52,7 @@ func (bvlc *BVLC) UnmarshalBinary(b []byte) error {
 func (bvlc *BVLC) MarshalBinary() ([]byte, error) {
 	b := make([]byte, bvlc.MarshalLen())
 	if err := bvlc.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "unable to marshal BVLC")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 
 	return b, nil
@@ -72,7 +70,7 @@ func (bvlc *BVLC) MarshalTo(b []byte) error {
 	if len(b) < bvlc.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("Marshal BVLC bin length %d, marshal length %d", len(b), bvlc.MarshalLen()),
+			fmt.Sprintf("failed to marshal BVLC %v - marshal length too short", bvlc.Function),
 		)
 	}
 	b[0] = byte(bvlc.Type)

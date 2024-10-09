@@ -16,5 +16,4 @@ var (
 	ErrWrongObjectCount        = errors.New("wrong object count")
 	ErrWrongStructure          = errors.New("unexpected object structure")
 	ErrWrongPayload            = errors.New("wrong payload type")
-	ErrInvalidObjectType       = errors.New("invalid object type")
 )

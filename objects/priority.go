@@ -12,7 +12,7 @@ func DecPriority(rawPayload APDUPayload) (uint8, error) {
 	if !ok {
 		return 0, errors.Wrap(
 			common.ErrWrongPayload,
-			fmt.Sprintf("DecPriority not ok %v", rawPayload),
+			fmt.Sprintf("failed to decode Priority Object - %v", rawPayload),
 		)
 	}
 
@@ -21,14 +21,13 @@ func DecPriority(rawPayload APDUPayload) (uint8, error) {
 		if rawObject.Length != 1 {
 			return 0, errors.Wrap(
 				common.ErrWrongStructure,
-				fmt.Sprintf("DecPriority length %d tag class  %v", rawObject.Length, rawObject.TagClass),
-			)
+				fmt.Sprintf("failed to decode Priority Object - wrong binary length - %x", rawObject.Data),)
 		}
 	case false:
 		if rawObject.Length != 1 || !rawObject.TagClass {
 			return 0, errors.Wrap(
 				common.ErrWrongStructure,
-				fmt.Sprintf("DecPriority length %d tag class  %v", rawObject.Length, rawObject.TagClass),
+				fmt.Sprintf("failed to decode Priority Object - wrong tag number - %v", rawObject.TagNumber),
 			)
 		}
 	}

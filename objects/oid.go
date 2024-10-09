@@ -2,7 +2,6 @@ package objects
 
 import (
 	"encoding/binary"
-	"fmt"
 
 	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/pkg/errors"
@@ -18,26 +17,17 @@ func DecObjectIdentifier(rawPayload APDUPayload) (ObjectIdentifier, error) {
 
 	rawObject, ok := rawPayload.(*Object)
 	if !ok {
-		return decObjectId, errors.Wrap(
-			common.ErrWrongPayload,
-			fmt.Sprintf("DecObjectIdentifier not ok: %T", rawPayload),
-		)
+		return decObjectId, errors.Wrap(common.ErrWrongPayload, "failed to decode ObjectID")
 	}
 
 	switch rawObject.TagClass {
 	case true:
 		if rawObject.Length != 4 {
-			return decObjectId, errors.Wrap(
-				common.ErrWrongStructure,
-				fmt.Sprintf("DecObjectIdentifier length: %d, tag class: %v", rawObject.Length, rawObject.TagClass),
-			)
+			return decObjectId, errors.Wrap(common.ErrWrongStructure, "failed to decode ObjectID - wrong binary length")
 		}
 	case false:
 		if rawObject.Length != 4 || rawObject.TagNumber != TagBACnetObjectIdentifier {
-			return decObjectId, errors.Wrap(
-				common.ErrWrongStructure,
-				fmt.Sprintf("DecObjectIdentifier length: %d, tag class: %v", rawObject.Length, rawObject.TagClass),
-			)
+			return decObjectId, errors.Wrap(common.ErrWrongStructure, "failed to decode ObjectID - wrong tag number")
 		}
 	}
 

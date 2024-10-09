@@ -20,12 +20,11 @@ type ComplexACKDec struct {
 	ObjectType   uint16
 	InstanceId   uint32
 	PropertyId   uint8
-	PresentValue interface{}
+	PresentValue float32
 }
 
-func ComplexACKObjects(objectType uint16, instN uint32, propertyId uint8, value interface{}) []objects.APDUPayload {
+func ComplexACKObjects(objectType uint16, instN uint32, propertyId uint8, value float32) []objects.APDUPayload {
 	objs := make([]objects.APDUPayload, 5)
-	fmt.Println("ComplexACKObjects")
 	objs[0] = objects.EncObjectIdentifier(true, 0, objectType, instN)
 	objs[1] = objects.EncPropertyIdentifier(true, 1, propertyId)
 	objs[2] = objects.EncOpeningTag(3)
@@ -48,15 +47,10 @@ func ComplexACKObjects(objectType uint16, instN uint32, propertyId uint8, value 
 	}
 
 	objs[4] = objects.EncClosingTag(3)
-	for _, o := range objs {
-		fmt.Printf("%v\n", o)
-	}
-	fmt.Println("ComplexACKObjects end")
 	return objs
 }
 
 func NewComplexACK(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *ComplexACK {
-	fmt.Println("NewComplexACK")
 	c := &ComplexACK{
 		BVLC: bvlc,
 		NPDU: npdu,
@@ -65,17 +59,14 @@ func NewComplexACK(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *ComplexACK {
 			objects.ObjectTypeAnalogOutput, 1, objects.PropertyIdPresentValue, 0)),
 	}
 	c.SetLength()
-	fmt.Printf("Type: %d, Service: %d\n", c.APDU.Type, c.APDU.Service)
-	fmt.Println("NewComplexACK end")
 	return c
 }
 
 func (c *ComplexACK) UnmarshalBinary(b []byte) error {
-	fmt.Printf("unmarshalBinary %x\n", b)
 	if l := len(b); l < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshal ComplexACK bin length %d, marshal length %d", l, c.MarshalLen()),
+			fmt.Sprintf("failed to unmarshal CACK %v - marshal length %d binary length %d", c, c.MarshalLen(), l),
 		)
 	}
 
@@ -83,7 +74,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if err := c.BVLC.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshal BVLC %x", b[offset:]),
+			fmt.Sprintf("unmarshalling CACK %v", c),
 		)
 	}
 	offset += c.BVLC.MarshalLen()
@@ -91,17 +82,15 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if err := c.NPDU.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshal NPDU %x", b[offset:]),
+			fmt.Sprintf("unmarshalling CACK %v", c),
 		)
 	}
 	offset += c.NPDU.MarshalLen()
 
-	fmt.Printf("\n\nAPDU binary %x\n", b[offset+11:])
-
 	if err := c.APDU.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshal APDU %x", b[offset:]),
+			fmt.Sprintf("unmarshalling CACK %v", c),
 		)
 	}
 
@@ -111,7 +100,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 func (c *ComplexACK) MarshalBinary() ([]byte, error) {
 	b := make([]byte, c.MarshalLen())
 	if err := c.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "unable to marshal ComplexACK")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -120,31 +109,22 @@ func (c *ComplexACK) MarshalTo(b []byte) error {
 	if len(b) < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("marshal ComplexACK bin length %d, marshal length %d", len(b), c.MarshalLen()),
+			fmt.Sprintf("failed to marshal CACK %x - marshal length too short", b),
 		)
 	}
 	var offset = 0
 	if err := c.BVLC.MarshalTo(b[offset:]); err != nil {
-		return errors.Wrap(
-			err,
-			fmt.Sprintf("marshal BVLC %x", b[offset:]),
-		)
+		return errors.Wrap(err, "marshalling CACK")
 	}
 	offset += c.BVLC.MarshalLen()
 
 	if err := c.NPDU.MarshalTo(b[offset:]); err != nil {
-		return errors.Wrap(
-			err,
-			fmt.Sprintf("marshal NPDU %x", b[offset:]),
-		)
+		return errors.Wrap(err, "marshalling CACK")
 	}
 	offset += c.NPDU.MarshalLen()
 
 	if err := c.APDU.MarshalTo(b[offset:]); err != nil {
-		return errors.Wrap(
-			err,
-			fmt.Sprintf("marshal APDU %x", b[offset:]),
-		)
+		return errors.Wrap(err, "marshalling CACK")
 	}
 
 	return nil
@@ -168,7 +148,7 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 	if len(c.APDU.Objects) != 3 {
 		return decCACK, errors.Wrap(
 			common.ErrWrongObjectCount,
-			fmt.Sprintf("complexACK object count %d", len(c.APDU.Objects)),
+			fmt.Sprintf("failed to decode CACK - objects count: %d", len(c.APDU.Objects)),
 		)
 	}
 

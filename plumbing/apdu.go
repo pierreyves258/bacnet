@@ -30,11 +30,10 @@ func NewAPDU(t, s uint8, objs []objects.APDUPayload) *APDU {
 
 // UnmarshalBinary sets the values retrieved from byte sequence in a APDU frame.
 func (a *APDU) UnmarshalBinary(b []byte) error {
-	fmt.Println("UnmarshalBinary APDU")
 	if l := len(b); l < a.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("Unmarshal APDU bin length %d, marshal length %d", l, a.MarshalLen()),
+			fmt.Sprintf("failed to unmarshal APDU - marshal length %d binary length %d", a.MarshalLen(), l),
 		)
 	}
 
@@ -101,13 +100,10 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 			a.Objects = objs
 		}
 	case ComplexAck, SimpleAck, Error:
-		fmt.Printf("case ACK/Err offset: %d\n", offset)
 		a.InvokeID = b[offset]
 		offset++
-		fmt.Printf("InvokeID %x offset %d\n", a.InvokeID, offset)
 		a.Service = b[offset]
 		offset++
-		fmt.Printf("Service %x offset %d\n", a.Service, offset)
 		if len(b) > 3 {
 			objs := []objects.APDUPayload{}
 			for {
@@ -134,7 +130,6 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				}
 
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
-				fmt.Printf("APDU object %v\n data %x\n offset %d\n", o, o.Data, offset)
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
 
@@ -155,7 +150,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 	if len(b) < a.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+			fmt.Sprintf("failed to marshal APDU - marshall length %d binary length %d", a.MarshalLen(), len(b)),
 		)
 	}
 
@@ -171,7 +166,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return errors.Wrap(err, "Marshal APDU")
+					return errors.Wrap(err, "failed to marshal UnconfirmedReq")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
@@ -180,7 +175,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+						fmt.Sprintf("failed to marshal UnconfirmedReq marshal length %d binary length %d", a.MarshalLen(), len(b)),
 					)
 				}
 			}
@@ -194,7 +189,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return errors.Wrap(err, "Marshal APDU")
+					return errors.Wrap(err, "failed to marshal CACK/SACK/ERROR")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
@@ -203,7 +198,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+						fmt.Sprintf("failed to marshal CACK/SACK/ERROR - binary overflow at offset %d", offset),
 					)
 				}
 			}
@@ -219,7 +214,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 			for _, o := range a.Objects {
 				ob, err := o.MarshalBinary()
 				if err != nil {
-					return errors.Wrap(err, "Marshal APDU")
+					return errors.Wrap(err, "failed to marshal ConfirmedReq")
 				}
 
 				copy(b[offset:offset+o.MarshalLen()], ob)
@@ -228,7 +223,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("Marshal APDU bin length %d, marshal length %d", len(b), a.MarshalLen()),
+						fmt.Sprintf("failed to marshal ConfirmedReq - binary overflow at offset %d", offset),
 					)
 				}
 			}

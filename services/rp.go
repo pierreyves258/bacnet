@@ -45,23 +45,34 @@ func NewConfirmedReadProperty(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Confirm
 
 func (c *ConfirmedReadProperty) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
-		fmt.Println("rp")
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("failed to unmarshal ConfirmedRP - marshal length %d binary length %d", c.MarshalLen(), l),
+		)
 	}
 
 	var offset int = 0
 	if err := c.BVLC.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling ConfirmedRP %v", c),
+		)
 	}
 	offset += c.BVLC.MarshalLen()
 
 	if err := c.NPDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling ConfirmedRP %v", c),
+		)
 	}
 	offset += c.NPDU.MarshalLen()
 
 	if err := c.APDU.UnmarshalBinary(b[offset:]); err != nil {
-		return common.ErrTooShortToParse
+		return errors.Wrap(
+			common.ErrTooShortToParse,
+			fmt.Sprintf("unmarshalling ConfirmedRP %v", c),
+		)
 	}
 
 	return nil
@@ -70,28 +81,31 @@ func (c *ConfirmedReadProperty) UnmarshalBinary(b []byte) error {
 func (c *ConfirmedReadProperty) MarshalBinary() ([]byte, error) {
 	b := make([]byte, c.MarshalLen())
 	if err := c.MarshalTo(b); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
 
 func (c *ConfirmedReadProperty) MarshalTo(b []byte) error {
 	if len(b) < c.MarshalLen() {
-		return common.ErrTooShortToMarshalBinary
+		return errors.Wrap(
+			common.ErrTooShortToMarshalBinary,
+			fmt.Sprintf("failed to marshal ConfirmedRP - marshal length %d binary length %d", c.MarshalLen(), len(b)),
+		)
 	}
 	var offset = 0
 	if err := c.BVLC.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "failed to marshal ConfirmedRP")
 	}
 	offset += c.BVLC.MarshalLen()
 
 	if err := c.NPDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "failed to marshal ConfirmedRP")
 	}
 	offset += c.NPDU.MarshalLen()
 
 	if err := c.APDU.MarshalTo(b[offset:]); err != nil {
-		return err
+		return errors.Wrap(err, "failed to marshal ConfirmedRP")
 	}
 
 	return nil
@@ -113,7 +127,10 @@ func (c *ConfirmedReadProperty) Decode() (ConfirmedReadPropertyDec, error) {
 	decCRP := ConfirmedReadPropertyDec{}
 
 	if len(c.APDU.Objects) != 2 {
-		return decCRP, common.ErrWrongObjectCount
+		return decCRP, errors.Wrap(
+			common.ErrWrongObjectCount,
+			fmt.Sprintf("failed to decode ConfirmedRP - object count %d", len(c.APDU.Objects)),
+		)
 	}
 
 	for i, obj := range c.APDU.Objects {
@@ -121,14 +138,14 @@ func (c *ConfirmedReadProperty) Decode() (ConfirmedReadPropertyDec, error) {
 		case 0:
 			objId, err := objects.DecObjectIdentifier(obj)
 			if err != nil {
-				return decCRP, err
+				return decCRP, errors.Wrap(err, "decoding ConfirmedRP")
 			}
 			decCRP.ObjectType = objId.ObjectType
 			decCRP.InstanceId = objId.InstanceNumber
 		case 1:
 			propId, err := objects.DecPropertyIdentifier(obj)
 			if err != nil {
-				return decCRP, err
+				return decCRP, errors.Wrap(err, "decoding ConfirmedRP")
 			}
 			decCRP.PropertyId = propId
 		}

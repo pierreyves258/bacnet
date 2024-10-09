@@ -53,7 +53,7 @@ func (c *ConfirmedWriteProperty) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal ConfirmedWP %v - marshal length too short", c),
+			fmt.Sprintf("failed to unmarshal ConfirmedWP - marshal length %d binary length %d", c.MarshalLen(), l),
 		)
 	}
 
@@ -87,7 +87,7 @@ func (c *ConfirmedWriteProperty) UnmarshalBinary(b []byte) error {
 func (c *ConfirmedWriteProperty) MarshalBinary() ([]byte, error) {
 	b := make([]byte, c.MarshalLen())
 	if err := c.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -96,7 +96,7 @@ func (c *ConfirmedWriteProperty) MarshalTo(b []byte) error {
 	if len(b) < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal ConfirmedWP %x - marshal length too short", b),
+			fmt.Sprintf("failed to marshal ConfirmedWP - marshal length %d binary length %d", c.MarshalLen(), len(b)),
 		)
 	}
 	var offset = 0

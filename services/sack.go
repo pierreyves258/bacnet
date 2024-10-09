@@ -31,7 +31,7 @@ func (s *SimpleACK) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < s.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal SACK %v - marshal length too short", s),
+			fmt.Sprintf("failed to unmarshal SACK - marshal length %d binary length %d", s.MarshalLen(), l),
 		)
 	}
 
@@ -65,7 +65,7 @@ func (s *SimpleACK) UnmarshalBinary(b []byte) error {
 func (s *SimpleACK) MarshalBinary() ([]byte, error) {
 	b := make([]byte, s.MarshalLen())
 	if err := s.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -74,7 +74,7 @@ func (s *SimpleACK) MarshalTo(b []byte) error {
 	if len(b) < s.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal SACK %x - marshal length too short", b),
+			fmt.Sprintf("failed to marshal SACK - marshal length %d binary length %d", s.MarshalLen(), len(b)),
 		)
 	}
 	var offset = 0

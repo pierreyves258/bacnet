@@ -49,7 +49,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal CACK %v - marshal length too short", c),
+			fmt.Sprintf("failed to unmarshal CACK %v - marshal length %d binary length %d", c, c.MarshalLen(), l),
 		)
 	}
 
@@ -83,7 +83,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 func (c *ComplexACK) MarshalBinary() ([]byte, error) {
 	b := make([]byte, c.MarshalLen())
 	if err := c.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }

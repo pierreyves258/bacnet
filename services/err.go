@@ -49,7 +49,7 @@ func (e *Error) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < e.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal Error %v - marshal length too short", e),
+			fmt.Sprintf("failed to unmarshal Error - marshal length %d binary length %d", e.MarshalLen(), l),
 		)
 	}
 
@@ -84,7 +84,7 @@ func (e *Error) UnmarshalBinary(b []byte) error {
 func (e *Error) MarshalBinary() ([]byte, error) {
 	b := make([]byte, e.MarshalLen())
 	if err := e.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -94,7 +94,7 @@ func (e *Error) MarshalTo(b []byte) error {
 	if len(b) < e.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal Error %x - marshal length too short", b),
+			fmt.Sprintf("failed to marshal Error - marshal length %d binary length %d", e.MarshalLen(), len(b)),
 		)
 	}
 	var offset = 0

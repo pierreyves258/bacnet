@@ -48,7 +48,7 @@ func (c *ConfirmedReadProperty) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal ConfirmedRP %v - marshal length too short", c),
+			fmt.Sprintf("failed to unmarshal ConfirmedRP - marshal length %d binary length %d", c.MarshalLen(), l),
 		)
 	}
 
@@ -82,7 +82,7 @@ func (c *ConfirmedReadProperty) UnmarshalBinary(b []byte) error {
 func (c *ConfirmedReadProperty) MarshalBinary() ([]byte, error) {
 	b := make([]byte, c.MarshalLen())
 	if err := c.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -91,7 +91,7 @@ func (c *ConfirmedReadProperty) MarshalTo(b []byte) error {
 	if len(b) < c.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal ConfirmedRP %x - marshal length too short", b),
+			fmt.Sprintf("failed to marshal ConfirmedRP - marshal length %d binary length %d", c.MarshalLen(), len(b)),
 		)
 	}
 	var offset = 0

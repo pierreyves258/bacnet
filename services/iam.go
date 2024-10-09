@@ -53,7 +53,7 @@ func (u *UnconfirmedIAm) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < u.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal UnconfirmedIAm %x - marshal length too short", b),
+			fmt.Sprintf("failed to unmarshal UnconfirmedIAm - marshal length %d binary length %d", u.MarshalLen(), l),
 		)
 	}
 
@@ -88,7 +88,7 @@ func (u *UnconfirmedIAm) UnmarshalBinary(b []byte) error {
 func (u *UnconfirmedIAm) MarshalBinary() ([]byte, error) {
 	b := make([]byte, u.MarshalLen())
 	if err := u.MarshalTo(b); err != nil {
-		return nil, errors.Wrap(err, "failed to marshal binary - marshal length too short")
+		return nil, errors.Wrap(err, "failed to marshal binary")
 	}
 	return b, nil
 }
@@ -98,7 +98,7 @@ func (u *UnconfirmedIAm) MarshalTo(b []byte) error {
 	if len(b) < u.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal UnconfirmedIAm %x - marshal length too short", b),
+			fmt.Sprintf("failed to marshal UnconfirmedIAm - marshal length %d binary length %d", u.MarshalLen(), len(b)),
 		)
 	}
 	var offset = 0

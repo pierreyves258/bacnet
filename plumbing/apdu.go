@@ -33,7 +33,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < a.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("failed to unmarshal APDU %v - marshal length too short", a.Type),
+			fmt.Sprintf("failed to unmarshal APDU - marshal length %d binary length %d", a.MarshalLen(), l),
 		)
 	}
 
@@ -141,7 +141,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 	if len(b) < a.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
-			fmt.Sprintf("failed to marshal APDU %v - marshal length too short", a.Type),
+			fmt.Sprintf("failed to marshal APDU - marshall length %d binary length %d", a.MarshalLen(), len(b)),
 		)
 	}
 
@@ -166,7 +166,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("failed to marshal UnconfirmedReq %v - marshal length too short", a.Type),
+						fmt.Sprintf("failed to marshal UnconfirmedReq marshal length %d binary length %d", a.MarshalLen(), len(b)),
 					)
 				}
 			}
@@ -189,7 +189,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("failed to marshal CACK/SACK/ERROR %x - binary overflow", b),
+						fmt.Sprintf("failed to marshal CACK/SACK/ERROR - binary overflow at offset %d", offset),
 					)
 				}
 			}
@@ -214,7 +214,7 @@ func (a *APDU) MarshalTo(b []byte) error {
 				if offset > a.MarshalLen() {
 					return errors.Wrap(
 						common.ErrTooShortToMarshalBinary,
-						fmt.Sprintf("failed to marshal ConfirmedReq %v - binary overflow", a.Type),
+						fmt.Sprintf("failed to marshal ConfirmedReq - binary overflow at offset %d", offset),
 					)
 				}
 			}

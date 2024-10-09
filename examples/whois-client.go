@@ -76,7 +76,6 @@ func whoIsExample(cmd *cobra.Command, args []string) {
 				break
 			}
 			log.Printf("got our own broadcast, back to listening...\n")
-			break
 		}
 
 		log.Printf("read %d bytes from %s: %x\n", nBytes, remoteAddr, replyRaw[:nBytes])

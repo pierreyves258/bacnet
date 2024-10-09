@@ -6,6 +6,7 @@ import (
 	"github.com/jonalfarlinga/bacnet/common"
 	"github.com/jonalfarlinga/bacnet/objects"
 	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/pkg/errors"
 )
 
 // UnconfirmedIAm is a BACnet message.

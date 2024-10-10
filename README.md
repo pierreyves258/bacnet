@@ -1,4 +1,6 @@
 # BACnet
+Forked from [@ulbios's](https://github.com/ulbios) repository, implementing a Go BACnet protocol.
+
 BACnet implementation in pure Golang. This work was initially based on [@kazukiigeta's](https://github.com/kazukiigeta)
 work available on the [kazukiigeta/bacnet](https://github.com/kazukiigeta/bacnet) repository.
 

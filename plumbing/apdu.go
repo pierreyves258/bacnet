@@ -55,6 +55,12 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					Length:    b[offset] & 0x7,
 				}
 
+				// Handle extended value case
+				if o.Length == 5 {
+					offset++
+					o.Length = uint8(b[offset])
+				}
+				
 				o.Data = b[offset+1 : offset+int(o.Length)+1]
 				objs = append(objs, &o)
 				offset += int(o.Length) + 1
@@ -78,6 +84,12 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 					TagNumber: b[offset] >> 4,
 					TagClass:  common.IntToBool(int(b[offset]) & 0x8 >> 3),
 					Length:    b[offset] & 0x7,
+				}
+
+				// Handle extended value case
+				if o.Length == 5 {
+					offset++
+					o.Length = uint8(b[offset])
 				}
 
 				// Drop tags so that they don't get in the way!

@@ -12,6 +12,11 @@ import (
 const bacnetLenMin = 8
 
 func combine(t, s uint8) uint16 {
+	// 0001, 0010
+	// return:
+	// 0001 0000 OR
+	// 0000 0010
+	// = 0001 0010
 	return uint16(t)<<8 | uint16(s)
 }
 
@@ -44,7 +49,11 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	offset += npdu.MarshalLen()
 
 	var c uint16
-	switch b[offset] >> 4 & 0xFF {
+	// We can use b[offset] >> 4 & 0xF
+	// PDU Types are [0x0, ..., 0x7]
+	// We can copmplete the list of PDUs with 0x6 and 0x4
+	PDUType := b[offset] >> 4 & 0xFF
+	switch PDUType {
 	case plumbing.UnConfirmedReq:
 		c = combine(b[offset], b[offset+1])
 	case plumbing.ConfirmedReq:
@@ -53,6 +62,8 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		c = combine(b[offset], 0) // We need to skip the PDU flags and the InvokeID
 	}
 
+	// why don't we create c using PDUType instead of b[offset]?
+	// then below cases don't have to be left-shifted
 	switch c {
 	case combine(plumbing.UnConfirmedReq<<4, services.ServiceUnconfirmedWhoIs):
 		bacnet = services.NewUnconfirmedWhoIs(&bvlc, &npdu)

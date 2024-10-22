@@ -3,7 +3,7 @@ package objects
 import (
 	"fmt"
 
-	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/pierreyves258/bacnet/common"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +21,7 @@ func DecPriority(rawPayload APDUPayload) (uint8, error) {
 		if rawObject.Length != 1 {
 			return 0, errors.Wrap(
 				common.ErrWrongStructure,
-				fmt.Sprintf("failed to decode Priority Object - wrong binary length - %x", rawObject.Data),)
+				fmt.Sprintf("failed to decode Priority Object - wrong binary length - %x", rawObject.Data))
 		}
 	case false:
 		if rawObject.Length != 1 || !rawObject.TagClass {

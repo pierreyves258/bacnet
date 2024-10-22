@@ -3,8 +3,8 @@ package services
 import (
 	"fmt"
 
-	"github.com/jonalfarlinga/bacnet/common"
-	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/pierreyves258/bacnet/common"
+	"github.com/pierreyves258/bacnet/plumbing"
 	"github.com/pkg/errors"
 )
 

@@ -2,10 +2,11 @@ package services
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/jonalfarlinga/bacnet/common"
-	"github.com/jonalfarlinga/bacnet/objects"
-	"github.com/jonalfarlinga/bacnet/plumbing"
+	"github.com/pierreyves258/bacnet/common"
+	"github.com/pierreyves258/bacnet/objects"
+	"github.com/pierreyves258/bacnet/plumbing"
 	"github.com/pkg/errors"
 )
 
@@ -25,28 +26,11 @@ type ComplexACKDec struct {
 
 func ComplexACKObjects(objectType uint16, instN uint32, propertyId uint8, value interface{}) []objects.APDUPayload {
 	objs := make([]objects.APDUPayload, 5)
-	objs[0] = objects.EncObjectIdentifier(true, 0, objectType, instN)
-	objs[1] = objects.EncPropertyIdentifier(true, 1, propertyId)
-	objs[2] = objects.EncOpeningTag(3)
 
-	switch v := value.(type) {
-	case int:
-		objs[3] = objects.EncReal(float32(v))
-	case uint8:
-		objs[3] = objects.EncUnsignedInteger8(v)
-	case uint16:
-		objs[3] = objects.EncUnsignedInteger16(v)
-	case float32:
-		objs[3] = objects.EncReal(v)
-	case string:
-		objs[3] = objects.EncString(v)
-	default:
-		panic(
-			fmt.Sprintf("Unsupported PresentValue type %T", value),
-		)
+	for i := range objs {
+		objs[i] = &objects.Object{}
 	}
 
-	objs[4] = objects.EncClosingTag(3)
 	return objs
 }
 
@@ -74,7 +58,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if err := c.BVLC.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshalling CACK %v", c),
+			fmt.Sprintf("unmarshalling CACK BVLC %v", c),
 		)
 	}
 	offset += c.BVLC.MarshalLen()
@@ -82,7 +66,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if err := c.NPDU.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshalling CACK %v", c),
+			fmt.Sprintf("unmarshalling CACK NPDU %v", c),
 		)
 	}
 	offset += c.NPDU.MarshalLen()
@@ -90,7 +74,7 @@ func (c *ComplexACK) UnmarshalBinary(b []byte) error {
 	if err := c.APDU.UnmarshalBinary(b[offset:]); err != nil {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
-			fmt.Sprintf("unmarshalling CACK %v", c),
+			fmt.Sprintf("unmarshalling CACK APDU %v", c),
 		)
 	}
 
@@ -160,7 +144,7 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 				fmt.Sprintf("ComplexACK object at index %d is not Object type", i),
 			)
 		}
-		fmt.Printf(
+		log.Printf(
 			"Object i %d tagnum %d tagclass %v data %x\n",
 			i, enc_obj.TagNumber, enc_obj.TagClass, enc_obj.Data,
 		)
@@ -194,6 +178,12 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 					return decCACK, errors.Wrap(err, "decode Application object case 7")
 				}
 				fmt.Printf("String value %s\n", value)
+				decCACK.PresentValue = value
+			case 9:
+				value, err := objects.DecEnumerated(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Application object case 7")
+				}
 				decCACK.PresentValue = value
 			}
 		}

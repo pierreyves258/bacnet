@@ -3,7 +3,7 @@ package objects
 import (
 	"fmt"
 
-	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/pierreyves258/bacnet/common"
 	"github.com/pkg/errors"
 )
 

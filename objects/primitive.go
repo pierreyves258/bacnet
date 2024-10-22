@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/jonalfarlinga/bacnet/common"
+	"github.com/pierreyves258/bacnet/common"
 	"github.com/pkg/errors"
 )
 

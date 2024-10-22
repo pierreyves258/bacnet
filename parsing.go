@@ -2,10 +2,13 @@ package bacnet
 
 import (
 	"fmt"
+	"reflect"
 
-	"github.com/jonalfarlinga/bacnet/common"
-	"github.com/jonalfarlinga/bacnet/plumbing"
-	"github.com/jonalfarlinga/bacnet/services"
+	"log"
+
+	"github.com/pierreyves258/bacnet/common"
+	"github.com/pierreyves258/bacnet/plumbing"
+	"github.com/pierreyves258/bacnet/services"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +25,6 @@ func combine(t, s uint8) uint16 {
 
 // Parse decodes the given bytes.
 func Parse(b []byte) (plumbing.BACnet, error) {
-
 	if len(b) < bacnetLenMin {
 		return nil, errors.Wrap(
 			common.ErrTooShortToParse,
@@ -35,17 +37,17 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	var bacnet plumbing.BACnet
 
 	offset := 0
-	fmt.Println("parsing")
+	log.Println("parsing")
 	if err := bvlc.UnmarshalBinary(b); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("Parsing BVLC %x", b))
 	}
-	fmt.Println("bvlc done")
+	log.Println("bvlc done")
 	offset += bvlc.MarshalLen()
 
 	if err := npdu.UnmarshalBinary(b[offset:]); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("Parsing NPDU %x", b[offset:]))
 	}
-	fmt.Println("npdu done")
+	log.Println("npdu done")
 	offset += npdu.MarshalLen()
 
 	var c uint16
@@ -86,6 +88,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		)
 	}
 
+	log.Printf("type %s\n", reflect.TypeOf(bacnet))
 	if err := bacnet.UnmarshalBinary(b); err != nil {
 		return nil, errors.Wrap(
 			err,
@@ -93,6 +96,6 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		)
 	}
 
-	fmt.Println("processed")
+	log.Println("processed")
 	return bacnet, nil
 }

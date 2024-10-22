@@ -4,9 +4,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/jonalfarlinga/bacnet"
-	"github.com/jonalfarlinga/bacnet/objects"
-	"github.com/jonalfarlinga/bacnet/services"
+	"github.com/pierreyves258/bacnet"
+	"github.com/pierreyves258/bacnet/objects"
+	"github.com/pierreyves258/bacnet/services"
 	"github.com/spf13/cobra"
 )
 

@@ -165,26 +165,39 @@ func (c *ComplexACK) Decode() (ComplexACKDec, error) {
 				decCACK.PropertyId = propId
 			}
 		} else {
+			//
 			switch enc_obj.TagNumber {
-			case 4:
+			case objects.TagReal:
 				value, err := objects.DecReal(obj)
 				if err != nil {
 					return decCACK, errors.Wrap(err, "decode Application object case 4")
 				}
 				decCACK.PresentValue = value
-			case 7:
+			case objects.TagCharacterString:
 				value, err := objects.DecString(obj)
 				if err != nil {
 					return decCACK, errors.Wrap(err, "decode Application object case 7")
 				}
 				fmt.Printf("String value %s\n", value)
 				decCACK.PresentValue = value
-			case 9:
+			case objects.TagEnumerated:
 				value, err := objects.DecEnumerated(obj)
 				if err != nil {
 					return decCACK, errors.Wrap(err, "decode Application object case 7")
 				}
 				decCACK.PresentValue = value
+			case objects.TagSignedInteger:
+				value, err := objects.DecSignedInteger(obj)
+				if err != nil {
+					return decCACK, errors.Wrap(err, "decode Application object case 7")
+				}
+				decCACK.PresentValue = value
+				// case objects.TagBitString:
+				// 	value, err := objects.DecBitString(obj)
+				// 	if err != nil {
+				// 		return decCACK, errors.Wrap(err, "decode Application object case 7")
+				// 	}
+				// 	decCACK.PresentValue = value
 			}
 		}
 	}

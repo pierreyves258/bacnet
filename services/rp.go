@@ -31,13 +31,38 @@ func ConfirmedReadPropertyObjects(objectType uint16, instN uint32, propertyId ui
 	return objs
 }
 
+func ConfirmedReadMultiplePropertyObjects(objectType uint16, instN uint32, propertyId []uint8) []objects.APDUPayload {
+	objs := make([]objects.APDUPayload, 3+len(propertyId))
+
+	objs[0] = objects.EncObjectIdentifier(true, 0, objectType, instN)
+	objs[1] = objects.EncOpeningTag(1)
+
+	for i := range propertyId {
+		objs[i+2] = objects.EncPropertyIdentifier(true, 1, propertyId[i])
+	}
+
+	objs[len(propertyId)+2] = objects.EncClosingTag(1)
+
+	return objs
+}
+
 func NewConfirmedReadProperty(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *ConfirmedReadProperty {
 	c := &ConfirmedReadProperty{
 		BVLC: bvlc,
 		NPDU: npdu,
 		// TODO: Consider to implement parameter struct to an argment of New functions.
-		APDU: plumbing.NewAPDU(plumbing.ConfirmedReq, ServiceConfirmedReadProperty, ConfirmedReadPropertyObjects(
-			objects.ObjectTypeAnalogOutput, 1, objects.PropertyIdPresentValue)),
+		APDU: plumbing.NewAPDU(plumbing.ConfirmedReq, ServiceConfirmedReadProperty, nil),
+	}
+	c.SetLength()
+
+	return c
+}
+
+func NewConfirmedReadPropertyMultiple(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *ConfirmedReadProperty {
+	c := &ConfirmedReadProperty{
+		BVLC: bvlc,
+		NPDU: npdu,
+		APDU: plumbing.NewAPDU(plumbing.ConfirmedReq, ServiceConfirmedReadPropMultiple, nil),
 	}
 	c.SetLength()
 

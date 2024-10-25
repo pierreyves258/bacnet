@@ -37,7 +37,19 @@ func NewError(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Error {
 		BVLC: bvlc,
 		NPDU: npdu,
 		// TODO: Consider to implement parameter struct to an argment of New functions.
-		APDU: plumbing.NewAPDU(plumbing.Error, ServiceConfirmedReadProperty, ErrorObjects(1, 31)),
+		APDU: plumbing.NewAPDU(plumbing.Error, ServiceConfirmedReadProperty, nil),
+	}
+	e.SetLength()
+
+	return e
+}
+
+func NewSegmentAck(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Error {
+	e := &Error{
+		BVLC: bvlc,
+		NPDU: npdu,
+		// TODO: Consider to implement parameter struct to an argment of New functions.
+		APDU: plumbing.NewAPDU(plumbing.SegmentAck, ServiceConfirmedReadProperty, nil),
 	}
 	e.SetLength()
 

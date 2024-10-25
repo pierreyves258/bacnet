@@ -68,6 +68,39 @@ func DecUnisgnedInteger(rawPayload APDUPayload) (uint32, error) {
 	)
 }
 
+func DecSignedInteger(rawPayload APDUPayload) (int32, error) {
+	rawObject, ok := rawPayload.(*Object)
+	if !ok {
+		return 0, errors.Wrap(
+			common.ErrWrongPayload,
+			fmt.Sprintf("failed to decode SignedInteger - %v", rawPayload),
+		)
+	}
+
+	if rawObject.TagNumber != TagSignedInteger || rawObject.TagClass {
+		return 0, errors.Wrap(
+			common.ErrWrongStructure,
+			fmt.Sprintf("failed to decode SignedInteger - wrong tag number - %v", rawObject.TagNumber),
+		)
+	}
+
+	switch rawObject.Length {
+	case 1:
+		return int32(rawObject.Data[0]), nil
+	case 2:
+		return int32(binary.BigEndian.Uint32([]byte{0x00, 0x00, rawObject.Data[0], rawObject.Data[1]})), nil
+	case 3:
+		return int32(binary.BigEndian.Uint32([]byte{0x00, rawObject.Data[0], rawObject.Data[1], rawObject.Data[2]})), nil
+	case 4:
+		return int32(binary.BigEndian.Uint32(rawObject.Data)), nil
+	}
+
+	return 0, errors.Wrap(
+		common.ErrNotImplemented,
+		fmt.Sprintf("failed to decode UnsignedInteger - %v", rawObject.Data),
+	)
+}
+
 func EncUnsignedInteger8(value uint8) *Object {
 	newObj := Object{}
 

@@ -60,7 +60,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		c = combine(b[offset], b[offset+1])
 	case plumbing.ConfirmedReq:
 		c = combine(b[offset], b[offset+3]) // We need to skip the PDU flags and the InvokeID
-	case plumbing.ComplexAck, plumbing.SimpleAck, plumbing.Error:
+	case plumbing.ComplexAck, plumbing.SimpleAck, plumbing.Error, plumbing.SegmentAck:
 		c = combine(b[offset], 0) // We need to skip the PDU flags and the InvokeID
 	}
 
@@ -81,6 +81,8 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		bacnet = services.NewSimpleACK(&bvlc, &npdu)
 	case combine(plumbing.Error<<4, 0):
 		bacnet = services.NewError(&bvlc, &npdu)
+	case combine(plumbing.SegmentAck<<4, 0):
+		bacnet = services.NewSegmentAck(&bvlc, &npdu)
 	default:
 		return nil, errors.Wrap(
 			common.ErrNotImplemented,

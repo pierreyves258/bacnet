@@ -120,6 +120,16 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 		if len(b) > 3 {
 			objs := []objects.APDUPayload{}
 			for {
+				// Drop tags so that they don't get in the way!
+				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
+					log.Print("tag opening/closing\n")
+					offset++
+					if offset >= len(b) {
+						break
+					}
+					continue
+				}
+
 				o := objects.Object{
 					TagNumber: b[offset] >> 4,
 					TagClass:  common.IntToBool(int(b[offset]) & 0x8 >> 3),
@@ -130,16 +140,6 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				if o.Length == 5 {
 					offset++
 					o.Length = uint8(b[offset])
-				}
-
-				// Drop tags so that they don't get in the way!
-				if b[offset] == objects.TagOpening || b[offset] == objects.TagClosing {
-					log.Print("tag opening/closing\n")
-					offset++
-					if offset >= len(b) {
-						break
-					}
-					continue
 				}
 
 				o.Data = b[offset+1 : offset+int(o.Length)+1]

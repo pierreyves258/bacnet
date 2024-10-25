@@ -64,6 +64,8 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 		c = combine(b[offset], 0) // We need to skip the PDU flags and the InvokeID
 	}
 
+	log.Printf("PDUType %+v | c %+v\n", PDUType, c)
+
 	// why don't we create c using PDUType instead of b[offset]?
 	// then below cases don't have to be left-shifted, test
 	switch c {

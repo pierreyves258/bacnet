@@ -10,34 +10,17 @@ import (
 )
 
 // UnconfirmedIAm is a BACnet message.
-type Error struct {
+type SegmentedAck struct {
 	*plumbing.BVLC
 	*plumbing.NPDU
 	*plumbing.APDU
 }
 
-type ErrorDec struct {
-	ErrorClass uint8
-	ErrorCode  uint8
-}
-
-// IAmObjects creates an instance of UnconfirmedIAm objects.
-func ErrorObjects(errClass, errCode uint8) []objects.APDUPayload {
-	objs := make([]objects.APDUPayload, 2)
-
-	objs[0] = objects.EncEnumerated(errClass)
-	objs[1] = objects.EncEnumerated(errCode)
-
-	return objs
-}
-
-// NewUnconfirmedIAm creates a UnconfirmedIam.
-func NewError(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Error {
-	e := &Error{
+func NewSegmentAck(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *SegmentedAck {
+	e := &SegmentedAck{
 		BVLC: bvlc,
 		NPDU: npdu,
-		// TODO: Consider to implement parameter struct to an argment of New functions.
-		APDU: plumbing.NewAPDU(plumbing.Error, ServiceConfirmedReadProperty, nil),
+		APDU: plumbing.NewAPDU(plumbing.SegmentAck, ServiceConfirmedReadProperty, nil),
 	}
 	e.SetLength()
 
@@ -45,7 +28,7 @@ func NewError(bvlc *plumbing.BVLC, npdu *plumbing.NPDU) *Error {
 }
 
 // UnmarshalBinary sets the values retrieved from byte sequence in a UnconfirmedIAm frame.
-func (e *Error) UnmarshalBinary(b []byte) error {
+func (e *SegmentedAck) UnmarshalBinary(b []byte) error {
 	if l := len(b); l < e.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToParse,
@@ -82,7 +65,7 @@ func (e *Error) UnmarshalBinary(b []byte) error {
 }
 
 // MarshalBinary returns the byte sequence generated from a UnconfirmedIAm instance.
-func (e *Error) MarshalBinary() ([]byte, error) {
+func (e *SegmentedAck) MarshalBinary() ([]byte, error) {
 	b := make([]byte, e.MarshalLen())
 	if err := e.MarshalTo(b); err != nil {
 		return nil, errors.Wrap(err, "failed to marshal binary")
@@ -91,7 +74,7 @@ func (e *Error) MarshalBinary() ([]byte, error) {
 }
 
 // MarshalTo puts the byte sequence in the byte array given as b.
-func (e *Error) MarshalTo(b []byte) error {
+func (e *SegmentedAck) MarshalTo(b []byte) error {
 	if len(b) < e.MarshalLen() {
 		return errors.Wrap(
 			common.ErrTooShortToMarshalBinary,
@@ -117,7 +100,7 @@ func (e *Error) MarshalTo(b []byte) error {
 }
 
 // MarshalLen returns the serial length of UnconfirmedIAm.
-func (e *Error) MarshalLen() int {
+func (e *SegmentedAck) MarshalLen() int {
 	l := e.BVLC.MarshalLen()
 	l += e.NPDU.MarshalLen()
 	l += e.APDU.MarshalLen()
@@ -126,19 +109,21 @@ func (e *Error) MarshalLen() int {
 }
 
 // SetLength sets the length in Length field.
-func (e *Error) SetLength() {
+func (e *SegmentedAck) SetLength() {
 	e.BVLC.Length = uint16(e.MarshalLen())
 }
 
-func (e *Error) Decode() (ErrorDec, error) {
+func (e *SegmentedAck) Decode() (ErrorDec, error) {
 	decErr := ErrorDec{}
 
-	if len(e.APDU.Objects) != 2 {
+	if len(e.APDU.Objects) != 4 {
 		return decErr, errors.Wrap(
 			common.ErrWrongObjectCount,
 			fmt.Sprintf("failed to decode Error - object count: %d", len(e.APDU.Objects)),
 		)
 	}
+
+	e.APDU.Objects = e.APDU.Objects[2:]
 
 	for i, obj := range e.APDU.Objects {
 		switch i {

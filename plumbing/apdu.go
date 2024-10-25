@@ -112,7 +112,7 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 			}
 			a.Objects = objs
 		}
-	case ComplexAck, SimpleAck, Error:
+	case ComplexAck, SimpleAck, Error, SegmentAck:
 		a.InvokeID = b[offset]
 		offset++
 		a.Service = b[offset]
@@ -151,6 +151,9 @@ func (a *APDU) UnmarshalBinary(b []byte) error {
 				}
 			}
 			log.Println("Objects: ", len(objs))
+			for i, o := range objs {
+				log.Printf("obj[%d]: %+v\n", i, o)
+			}
 			a.Objects = objs
 		}
 	}
@@ -253,7 +256,7 @@ func (a *APDU) MarshalLen() int {
 	switch a.Type {
 	case ConfirmedReq:
 		l += 4
-	case ComplexAck, SimpleAck, Error:
+	case ComplexAck, SimpleAck, Error, SegmentAck:
 		l += 3
 	case UnConfirmedReq:
 		l += 2

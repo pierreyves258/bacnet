@@ -65,7 +65,7 @@ func Parse(b []byte) (plumbing.BACnet, error) {
 	}
 
 	// why don't we create c using PDUType instead of b[offset]?
-	// then below cases don't have to be left-shifted
+	// then below cases don't have to be left-shifted, test
 	switch c {
 	case combine(plumbing.UnConfirmedReq<<4, services.ServiceUnconfirmedWhoIs):
 		bacnet = services.NewUnconfirmedWhoIs(&bvlc, &npdu)
